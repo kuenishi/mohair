@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version       = Mohair::VERSION
   gem.authors       = ["UENISHI Kota"]
   gem.email         = ["kuenishi@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{a new type of Riak client}
+  gem.summary       = %q{a new type of a riak client}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
