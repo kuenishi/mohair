@@ -1,4 +1,5 @@
 require 'mohair'
+require 'riak'
 
 module Mohair
   class Selector
@@ -35,9 +36,25 @@ module Mohair
     end
     def exec!
       pr
+      @client = Riak::Client.new(:protocol => "http")
+      @from.each do |b|
+        bucket = @client.bucket(b)
+        results = Riak::MapReduce.new(@client)
+          .add(bucket)         ## keyfilsters and so on here
+          .map("function(v){ return [v]; }", :keep => true) ## put logics here
+          .run
+
+        results.each do |o|
+          print "{#{o["bucket"]}, #{o["key"]}} -> \n"
+          o["values"].each do |data|
+            print "\t#{o["values"][0]["data"]}\n"
+          end
+        end
+        #          .map("function(v){ return [JSON.parse(v.values[0].data)]; }", :keep => true).run
+      end
     end
     def pr
-      print "<select> #{@cols} <from> #{@from};\n"
+      print "query: <select> #{@cols} <from> #{@from};\n"
     end
   end
 end
