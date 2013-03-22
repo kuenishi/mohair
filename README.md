@@ -18,7 +18,27 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+now:
+
+```
+$ bundle exec bin/mohair select all from sometable
+$ bundle exec bin/mohair_dump < data.json
+```
+
+future:
+
+```
+$ bundle exec bin/mohair -i
+mohair> select * from sometable
+mohair> insert * into ...
+mohair>
+```
+
+```
+$ bundle exec bin/mohair -e "select * from sometable"
+...
+```
+
 
 ## Contributing
 
