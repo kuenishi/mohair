@@ -34,7 +34,7 @@ module Mohair
       rule(:identifier) { match('[a-z]').repeat(1) }
 
       rule(:function)   {
-        identifier.as(:funcname) >> space? >>
+        identifier.as(:function) >> space? >>
         lparen >> arglist.as(:arguments) >> rparen
       }
 
