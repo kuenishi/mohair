@@ -1,20 +1,34 @@
+require "mohair/sql/parser"
+
 require "mohair/version"
 require "mohair/selector"
 require "mohair/inserter"
 
 require "json"
 
+require "logger"
+LOG = Logger.new(STDERR)
+LOG.level = Logger::DEBUG # WARN, INFO, DEBUG, ...
+
 module Mohair
   # Your code goes here...
+  
   def self.main
-    case ARGV[0].downcase
+    @parser = Sql::Parser.new
+    result =  @parser.parse ARGV[0]
+
+    p result
+    
+    case result[:op]
     when 'select'
-      Selector.new(ARGV).exec!
-    when 'insert'
-    when 'show'
-    when 'create'
+      LOG.debug result
+      Selector.new(result).exec!
+    # when :insert
+    # when :show
+    # when :create
+    #   LOG.error "CREATE sentence is unavailable at mohair"
     else
-      print "bad query: ", ARGV, "\n"
+      LOG.error "bad query: ", result, "\n"
     end
   end
 

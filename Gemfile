@@ -4,4 +4,5 @@ gemspec
 
 # Specify your gem's dependencies in mohair.gemspec
 gem "riak-client"
-
+gem "parslet"
+# gem "treetop"
