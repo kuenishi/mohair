@@ -61,7 +61,7 @@ module Mohair
       }
 
       rule(:select_s)   {
-        str('select').as(:op) >> space? >> arglist.as(:select)
+        str('select').as(:op) >> space? >> (arglist | str('*')).as(:select)
       }
       rule(:from_s)     {
         str('from') >> space? >> namelist.as(:from)

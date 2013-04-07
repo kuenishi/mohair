@@ -6,12 +6,13 @@ module Mohair
 
   MapperTemplate = <<EOMAP
 function(v){
-  var obj = [JSON.parse(v.values[0].data)];
+  var obj = JSON.parse(v.values[0].data);
   var ret = {};
   <% select.each do |c| %>
   <%=  c %>
   <% end %>
-  return ret;
+  ret.__key = v.key;
+  return [ret];
 }
 EOMAP
 
@@ -20,6 +21,13 @@ function(v){
 }
 EOREDUCE
 
+  GetAllMapper = <<GETALLMAPPER
+function(v){
+  var ret = JSON.parse(v.values[0].data);
+  ret.__key = v.key;
+  return [ret];
+}
+GETALLMAPPER
   
   class Column
     def initialize c
@@ -37,7 +45,7 @@ EOREDUCE
       when :function
         "ret[#{@name}] = #{@name}(obj[#{@argv[:item].to_s}]);"
       when :column
-        "ret[#{@name}] = obj[#{@name}];"
+        "ret.#{@name} = obj.#{@name};"
       end
     end
   end
@@ -48,50 +56,54 @@ EOREDUCE
       @select = @tree[:select]
       @from   = @tree[:from][:name].to_s
       @where  = @tree[:where]
-      p @select, @from, @where
+      # p @select, @from, @where
       set_mapper_reducer!
     end
 
     def set_mapper_reducer!
       select = []
-      @select.each do |i|
-        c = Column.new i[:item]
-        select << c.line
+      if @select == "*" then
+        @mapper = GetAllMapper
+      elsif not @select.is_a? Array then
+        select << Column.new(@select[:item]).line
+        @mapper = ERB.new(MapperTemplate).result(binding)
+      else
+        @select.each do |i|
+          c = Column.new(i[:item])
+          select << c.line
+        end
+        @mapper = ERB.new(MapperTemplate).result(binding)
       end
-      p select
-      @mapper = ERB.new(MapperTemplate).result(binding)
+
       @reducer = nil
     end
 
     def set_mr mr
+      imm = mr.map(@mapper, :keep => true)
 
-      imm = mr.map(mapper, :keep => true)
-      if reducer then
-        imm = imm.reduce(reducer, :keep => true)
+      if @reducer then
+        imm = imm.reduce(@reducer, :keep => true)
       end
       imm
     end
 
     def exec!
-      pr
       @client = Riak::Client.new(:protocol => "http")
       bucket = @client.bucket(@from)
-      #   results = set_mr(Riak::MapReduce.new(@client)
-      #                      .add(bucket)         ## keyfilsters and so on here
-      #                    ).run
-
-      #   results.each do |o|
-      #     print "{#{o["bucket"]}, #{o["key"]}}\n"
-      #     o["values"].each do |data|
-      #       print "\t-> #{o["values"][0]["data"]}\n"
-      #     end
-      #   end
-      #   #          .map("function(v){ return [JSON.parse(v.values[0].data)]; }", :keep => true).run
-      # end
+      @results = set_mr(Riak::MapReduce.new(@client)
+                         .add(bucket)         ## keyfilsters and so on here
+                       ).run
     end
     def pr
       print @mapper
       print @reducer
+    end
+
+    def format_result
+      columns = []
+      #@results.each do |r|
+      #end
+      p @results
     end
   end
 end
