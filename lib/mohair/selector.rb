@@ -12,7 +12,8 @@ function(v){
   <%=  c %>
   <% end %>
   ret.__key = v.key;
-  return [ret];
+  //return [ret];
+  <%= where %>
 }
 EOMAP
 
@@ -25,7 +26,7 @@ EOREDUCE
 function(v){
   var ret = JSON.parse(v.values[0].data);
   ret.__key = v.key;
-  return [ret];
+  <%= where %>
 }
 GETALLMAPPER
   
@@ -62,6 +63,7 @@ GETALLMAPPER
 
     def set_mapper_reducer!
       select = []
+      where = where2if
       if @select == "*" then
         @mapper = GetAllMapper
       elsif not @select.is_a? Array then
@@ -74,8 +76,32 @@ GETALLMAPPER
         end
         @mapper = ERB.new(MapperTemplate).result(binding)
       end
-
+      print @mapper
       @reducer = nil
+    end
+
+    def where2if
+      if @where.nil? then
+        return "return [ret];"
+      else
+        s = cond_str @where
+        "if(#{s}){ return [ret]; }else{ return []; }"
+      end
+    end
+    def cond_str cond
+      lhs = cond[:lhs]
+      rhs = cond[:rhs]
+      if (lhs.to_s =~ /^[0-9]+$/).nil? then
+        lhs = "obj.#{lhs}"
+      else
+        lhs = lhs.to_i
+      end
+      if (rhs.to_s =~ /[0-9]+$/).nil? then
+        rhs = "obj.#{rhs}"
+      else
+        rhs = rhs.to_i
+      end
+      " (#{lhs}) #{cond[:op]} (#{rhs}) "
     end
 
     def set_mr mr
