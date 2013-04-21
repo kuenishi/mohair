@@ -12,13 +12,21 @@ function(v){
   <%=  c %>
   <% end %>
   ret.__key = v.key;
-  //return [ret];
   <%= where %>
 }
 EOMAP
 
   ReducerTemplate = <<EOREDUCE
-function(v){
+function(values){
+  var ret = {};
+  // init lines
+  ret.sum_age = 0;
+  for(var i in values){
+    var v=values[i];
+    // agg lines
+    if(!!(v.sum_age)){ ret.sum_age += v.sum_age; }
+  }
+  return [ret];
 }
 EOREDUCE
 
@@ -41,12 +49,50 @@ GETALLMAPPER
         @name = c.to_s
       end
     end
-    def line
+    def js_mapper
+      s = @argv[:item].to_s
+      case @name.to_s
+      when 'sum' then
+        "ret.sum_#{s} = obj.#{s};"
+      when 'avg' then
+        "ret.sum_#{s} = obj.#{s};\n ret.#{s}_count = 1;"
+      when 'count' then
+        "if(!!(obj.#{s})){ ret.count_#{s} = 1; }"
+      end
+    end
+    def js_reducer
+      s = @argv[:item].to_s
+      case @name.to_s
+      when 'sum' then
+        ["ret.sum_#{s} = 0;", "if(!!(v.sum_#{s})){ ret.sum_#{s} += v.sum_#{s}; }"]
+      when 'avg' then
+        ["ret.sum_#{s} = 0; ret.count_#{s} = 0;",
+         "if(!!(v.sum_#{s})){ ret.sum_#{s} += v.sum_#{s};\n ret.count_#{s} += v.count_#{s}; }"]
+      when 'count' then
+        ["ret.count_#{s} = 0;",
+         "if(!!(v.count_#{s})){ ret.count_#{s} += v.count_#{s}; }"]
+      end
+    end
+
+    def mapper_line
       case @type
       when :function
-        "ret[#{@name}] = #{@name}(obj[#{@argv[:item].to_s}]);"
+        js_mapper
       when :column
         "ret.#{@name} = obj.#{@name};"
+      end
+    end
+
+    def agg? 
+      case @name.to_s
+      when 'sum' then
+        true
+      when 'avg' then
+        true
+      when 'count' then
+        true
+      else
+        false
       end
     end
   end
@@ -57,27 +103,41 @@ GETALLMAPPER
       @select = @tree[:select]
       @from   = @tree[:from][:name].to_s
       @where  = @tree[:where]
+      @agg = false
       # p @select, @from, @where
       set_mapper_reducer!
     end
 
     def set_mapper_reducer!
       select = []
+      agg = []
       where = where2if
+      @reducer = nil
       if @select == "*" then
-        @mapper = GetAllMapper
+        @mapper = ERB.new(GetAllMapper).result(binding)
+
       elsif not @select.is_a? Array then
-        select << Column.new(@select[:item]).line
+        c = Column.new(@select[:item])
+        select << c.mapper_line
         @mapper = ERB.new(MapperTemplate).result(binding)
+        if c.agg? then
+          @reducer = ERB.new(ReducerTemplate).result(binding)
+        end
       else
         @select.each do |i|
           c = Column.new(i[:item])
-          select << c.line
+          select << c.mapper_line
         end
+        
         @mapper = ERB.new(MapperTemplate).result(binding)
+        @reducer = ERB.new(ReducerTemplate).result(binding)
       end
+
+      print "mapper:"
       print @mapper
-      @reducer = nil
+      print "reducer:"
+      print @reducer
+      print "--\n"
     end
 
     def where2if
@@ -112,7 +172,7 @@ GETALLMAPPER
     end
 
     def set_mr mr
-      imm = mr.map(@mapper, :keep => true)
+      imm = mr.map(@mapper, :keep => @reducer.nil?)
 
       if @reducer then
         imm = imm.reduce(@reducer, :keep => true)
