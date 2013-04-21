@@ -88,6 +88,13 @@ GETALLMAPPER
         "if(#{s}){ return [ret]; }else{ return []; }"
       end
     end
+    def operator2str op
+      case op.to_s.chop
+      when '=' then '=='
+      when '<>' then '!='
+      else op.to_s
+      end
+    end
     def cond_str cond
       lhs = cond[:lhs]
       rhs = cond[:rhs]
@@ -101,7 +108,7 @@ GETALLMAPPER
       else
         rhs = rhs.to_i
       end
-      " (#{lhs}) #{cond[:op]} (#{rhs}) "
+      " (#{lhs}) #{operator2str(cond[:op])} (#{rhs}) "
     end
 
     def set_mr mr
