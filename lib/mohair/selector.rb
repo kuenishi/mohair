@@ -133,10 +133,24 @@ GETALLMAPPER
     end
 
     def format_result
-      columns = []
-      #@results.each do |r|
-      #end
-      p @results
+      columns = Set.new
+      @results.each do |r|
+        r.each do |k,v|
+          columns.add(k)
+        end
+      end
+      columns.delete('__key')
+      cols = columns.to_a.join("\t| ")
+      print "|               | #{cols}|\n"
+      print "+---------------+------------------------------+\n"
+      @results.each do |r|
+        print "| #{r['__key']}\t| "
+        columns.to_a.each do |c|
+          print "#{r[c]} \t| "
+        end
+        print "\n"
+      end
+      
     end
   end
 end
