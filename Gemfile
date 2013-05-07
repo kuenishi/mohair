@@ -6,3 +6,4 @@ gemspec
 gem "riak-client"
 gem "parslet"
 # gem "treetop"
+gem 'json', '~> 1.7.7'
