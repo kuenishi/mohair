@@ -23,17 +23,17 @@ function(values){
   <%= agg_init %>
   for(var i in values){
     var v=values[i];
-    // agg lines
     <%= agg_fun %>
-    //if(!!(v.sum_age)){ ret.sum_age += v.sum_age; }
   }
   return [ret];
 }
 EOREDUCE
+  # if(!!(v.sum_age)){ ret.sum_age += v.sum_age; }
 
   GetAllMapper = <<GETALLMAPPER
 function(v){
-  var ret = JSON.parse(v.values[0].data);
+  var obj = JSON.parse(v.values[0].data);
+  var ret = obj;
   ret.__key = v.key;
   <%= where %>
 }
@@ -166,7 +166,7 @@ GETALLMAPPER
       lhs = cond[:lhs]
       rhs = cond[:rhs]
       if (lhs.to_s =~ /^[0-9]+$/).nil? then
-        lhs = "ret.#{lhs}"
+        lhs = "obj.#{lhs}"
       else
         lhs = lhs.to_i
       end
