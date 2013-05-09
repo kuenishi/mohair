@@ -20,11 +20,12 @@ EOMAP
 function(values){
   var ret = {};
   // init lines
-  ret.sum_age = 0;
+  <%= agg_init %>
   for(var i in values){
     var v=values[i];
     // agg lines
-    if(!!(v.sum_age)){ ret.sum_age += v.sum_age; }
+    <%= agg_fun %>
+    //if(!!(v.sum_age)){ ret.sum_age += v.sum_age; }
   }
   return [ret];
 }
@@ -51,13 +52,18 @@ GETALLMAPPER
     end
     def js_mapper
       s = @argv[:item].to_s
+      o = 'obj'
       case @name.to_s
       when 'sum' then
         "ret.sum_#{s} = obj.#{s};"
       when 'avg' then
-        "ret.sum_#{s} = obj.#{s};\n ret.#{s}_count = 1;"
+        "ret.sum_#{s} = obj.#{s};\n ret.count_#{s} = 1;"
       when 'count' then
-        "if(!!(obj.#{s})){ ret.count_#{s} = 1; }"
+        if s == 'key' then
+          "if(!!(v.#{s})){ ret.count_#{s} = 1; }"
+        else
+          "if(!!(obj.#{s})){ ret.count_#{s} = 1; }"
+        end
       end
     end
     def js_reducer
@@ -121,6 +127,7 @@ GETALLMAPPER
         select << c.mapper_line
         @mapper = ERB.new(MapperTemplate).result(binding)
         if c.agg? then
+          agg_init, agg_fun = c.js_reducer
           @reducer = ERB.new(ReducerTemplate).result(binding)
         end
       else
@@ -133,9 +140,9 @@ GETALLMAPPER
         @reducer = ERB.new(ReducerTemplate).result(binding)
       end
 
-      print "mapper:"
+      print "mapper:\n"
       print @mapper
-      print "reducer:"
+      print "reducer:\n"
       print @reducer
       print "--\n"
     end
@@ -159,7 +166,7 @@ GETALLMAPPER
       lhs = cond[:lhs]
       rhs = cond[:rhs]
       if (lhs.to_s =~ /^[0-9]+$/).nil? then
-        lhs = "obj.#{lhs}"
+        lhs = "ret.#{lhs}"
       else
         lhs = lhs.to_i
       end
