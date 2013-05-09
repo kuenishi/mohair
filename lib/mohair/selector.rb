@@ -6,13 +6,24 @@ module Mohair
 
   MapperTemplate = <<EOMAP
 function(v){
-  var obj = JSON.parse(v.values[0].data);
-  var ret = {};
-  <% select.each do |c| %>
-  <%=  c %>
-  <% end %>
-  ret.__key = v.key;
-  <%= where %>
+  var f = function(key, obj){
+    var ret = {};
+    <% select.each do |c| %>
+    <%=  c %>
+    <% end %>
+    ret.__key = key;
+    <%= where %>
+  };
+  var raw_obj = JSON.parse(v.values[0].data);
+  if(raw_obj instanceof Array){
+    var ret0 = [];
+    for(var i in raw_obj){
+      ret0 = ret0.concat(f(v.key, raw_obj[i]));
+    }
+    return ret0;
+  }else{
+    return f(v.key, raw_obj);
+  }
 }
 EOMAP
 
@@ -33,9 +44,21 @@ EOREDUCE
 
   GetAllMapper = <<GETALLMAPPER
 function(v){
-  var ret = JSON.parse(v.values[0].data);
-  ret.__key = v.key;
-  <%= where %>
+  var f = function(key, obj){
+    var ret = obj;
+    ret.__key = key;
+    <%= where %>
+  };
+  var raw_obj = JSON.parse(v.values[0].data);
+  if(raw_obj instanceof Array){
+    var ret0 = [];
+    for(var i in raw_obj){
+      ret0 = ret0.concat(f(v.key, raw_obj[i]));
+    }
+    return ret0;
+  }else{
+    return f(v.key, raw_obj);
+  }
 }
 GETALLMAPPER
   
@@ -123,6 +146,7 @@ GETALLMAPPER
         @mapper = ERB.new(GetAllMapper).result(binding)
 
       elsif not @select.is_a? Array then
+
         c = Column.new(@select[:item])
         select << c.mapper_line
         @mapper = ERB.new(MapperTemplate).result(binding)
@@ -135,7 +159,6 @@ GETALLMAPPER
           c = Column.new(i[:item])
           select << c.mapper_line
         end
-        
         @mapper = ERB.new(MapperTemplate).result(binding)
         @reducer = ERB.new(ReducerTemplate).result(binding)
       end
