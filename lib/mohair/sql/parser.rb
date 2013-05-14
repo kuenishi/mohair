@@ -14,21 +14,21 @@ module Mohair
       rule(:rparen)     { str(')') >> space? }
 
       # logical operators
-      rule(:eq)         { str('=') >> space? }
-      rule(:neq)        { (str('!=') | str('<>') )>> space? }
-      rule(:gt)         { str('>') >> space? }
-      rule(:lt)         { str('<') >> space? }
-      rule(:geq)        { str('>=') >> space? }
-      rule(:leq)        { str('<=') >> space? }
-      rule(:btw)        { str('between') >> space? }
+      rule(:eq)         { str('=') }
+      rule(:neq)        { str('!=') | str('<>') }
+      rule(:gt)         { str('>') }
+      rule(:lt)         { str('<') }
+      rule(:geq)        { str('>=') }
+      rule(:leq)        { str('<=') }
+      rule(:btw)        { str('between') }
       #rule(:like)       { str('like') >> space? }
-      rule(:binop)      { eq | neq | gt | lt | geq | leq | btw }
+      rule(:binop)      { eq | neq | gt | lt | geq | leq | btw}
 
       rule(:const)      { integer }
       rule(:term)       { const | item }
 
-      rule(:bool_and)        { str('and') >> space? }
-      rule(:bool_or)         { str('or') >> space? }
+      rule(:bool_and)   { str('and') }
+      rule(:bool_or)    { str('or') }
 
 
       rule(:identifier) { match('[a-z]').repeat(1) }
@@ -48,16 +48,14 @@ module Mohair
       }
 
       rule(:single_cond){
-        term.as(:lhs) >> space? >> binop.as(:op) >> term.as(:rhs)
+        term.as(:lhs) >> space? >> binop.as(:op) >> space? >> term.as(:rhs)
       }
-      # rule(:combined_cond_and){
-      #   condition.as(:lhs) >> bool_and >> condition.as(:rhs)
-      # }
-      # rule(:combined_cond_or){
-      #   condition.as(:lhs) >> bool_or  >> condition.as(:rhs)
-      # }
+
       rule(:condition)  {
-        single_cond # | combined_cond_and | combined_cond_or
+        single_cond.as(:lhs) >> space? >>
+        ((bool_and.as(:op) | bool_or.as(:op)) >>
+         space? >>
+         condition.as(:rhs)).maybe
       }
 
       rule(:select_s)   {

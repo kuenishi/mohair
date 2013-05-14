@@ -177,22 +177,32 @@ GETALLMAPPER
         "if(#{s}){ return [ret]; }else{ return []; }"
       end
     end
+    
     def operator2str op
-      case op.to_s.chop
+      ## SQL to JS operator
+      case op.to_s
       when '=' then '=='
       when '<>' then '!='
+      when "and" then '&&'
+      when 'or' then '||'
       else op.to_s
       end
     end
     def cond_str cond
       lhs = cond[:lhs]
       rhs = cond[:rhs]
-      if (lhs.to_s =~ /^[0-9]+$/).nil? then
+      if lhs.class == Hash then
+        lhs = cond_str lhs
+      elsif (lhs.to_s =~ /^[0-9]+$/).nil? then
         lhs = "obj.#{lhs}"
       else
         lhs = lhs.to_i
       end
-      if (rhs.to_s =~ /[0-9]+$/).nil? then
+      if rhs.nil? then
+        return lhs
+      elsif rhs.class == Hash then
+        rhs = cond_str rhs
+      elsif (rhs.to_s =~ /[0-9]+$/).nil? then
         rhs = "obj.#{rhs}"
       else
         rhs = rhs.to_i
