@@ -31,7 +31,7 @@ EOS
     end
 
     @parser = Sql::Parser.new
-    sql_syntax_tree =  @parser.parse ARGV[0]
+    sql_syntax_tree =  @parser.parse (ARGV[0].strip)
 
     case sql_syntax_tree[:op]
     when 'select'
