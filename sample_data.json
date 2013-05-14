@@ -2,34 +2,39 @@
     "key" : "ham",
     "data" : {
         "name" : "john smith",
-        "age"  : 42
+        "age"  : 42,
+        "gender" : "male"
     }
 },
  {
      "key" : "hamspam",
      "data" : {
         "name" : "john smith",
-        "age"  : 42
+        "age"  : 42,
+        "gender" : "male"
      }
  },
  {
      "key" : "eggspam",
      "data" : {
-        "name" : "john smith",
-        "age"  : 42
+        "name" : "joanna smith",
+        "age"  : 42,
+        "gender" : "female"
      }
  },
  {
      "key" : "adam_smith2",
      "data" : {
          "name" : "john smith",
-         "age"  : 42
+         "age"  : 42,
+         "gender" : "male"
      }
  },
  {
      "key" : "adam_smith",
      "data" : {
         "name" : "Adam smith",
-        "age"  : 456
+        "age"  : 456,
+        "gender" : "male"
      }
  }]

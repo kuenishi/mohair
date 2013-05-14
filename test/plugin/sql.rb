@@ -42,7 +42,8 @@ class ParserTest < MiniTest::Unit::TestCase
      'select a,b from c where a = 20',
      'select a,b from c where 20 < a and b < 234',
      'select a,b from c where 20 < a or b = 234',
-     #'select a, b from c where a == "oo"'
+     'select a, b from c where a = "oo"',
+     'select a, b from c where a = "oo" and c > 235',
     ].each do |where_sql|
       s = @parser.parse where_sql
       assert_equal(expected = "select", actual = s[:op])

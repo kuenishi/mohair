@@ -6,6 +6,7 @@ module Mohair
   module Sql
     class Parser < Parslet::Parser
       rule(:integer)    { match('[0-9]').repeat(1) }
+      #rule(:float)      { integer.repeat >> str('.') >> integer.maybe }
 
       rule(:space)      { match('\s').repeat(1) }
       rule(:space?)     { space.maybe }
@@ -24,7 +25,11 @@ module Mohair
       #rule(:like)       { str('like') >> space? }
       rule(:binop)      { eq | neq | gt | lt | geq | leq | btw}
 
-      rule(:const)      { integer }
+      rule(:string)     { str('"') >> match('[a-zA-Z0-9]').repeat >> str('"') }
+
+      rule(:const)      {
+        integer | string
+      }
       rule(:term)       { const | item }
 
       rule(:bool_and)   { str('and') }

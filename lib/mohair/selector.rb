@@ -191,10 +191,15 @@ GETALLMAPPER
     def cond_str cond
       lhs = cond[:lhs]
       rhs = cond[:rhs]
+
       if lhs.class == Hash then
         lhs = cond_str lhs
       elsif (lhs.to_s =~ /^[0-9]+$/).nil? then
-        lhs = "obj.#{lhs}"
+        if (lhs.to_s[0] == "\"" and lhs.to_s[-1] == "\"") then
+          lhs = lhs.to_s
+        else
+          lhs = "obj.#{lhs}"
+        end
       else
         lhs = lhs.to_i
       end
@@ -203,10 +208,17 @@ GETALLMAPPER
       elsif rhs.class == Hash then
         rhs = cond_str rhs
       elsif (rhs.to_s =~ /[0-9]+$/).nil? then
-        rhs = "obj.#{rhs}"
+
+        if (rhs.to_s[0] == "\"" and rhs.to_s[-1] == "\"") then
+          rhs = rhs.to_s
+        else
+          rhs = "obj.#{rhs}"
+        end
+
       else
         rhs = rhs.to_i
       end
+
       " (#{lhs}) #{operator2str(cond[:op])} (#{rhs}) "
     end
 
