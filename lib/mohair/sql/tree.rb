@@ -106,18 +106,24 @@ module Mohair
       if tree[:rhs].nil? && tree[:lhs].class == Hash then
         tree = tree[:lhs]
       end
-      @lhs = tree[:lhs].to_s
-      @rhs = tree[:rhs].to_s
+      lhs = tree[:lhs]
+      rhs = tree[:rhs]
       @op  = tree[:op].to_s
 
-      if (@lhs =~ /^[0-9]+$/).nil? then
+      if lhs.class == Hash then
+        @lhs = Condition.new lhs
+      elsif (lhs.to_s =~ /^[0-9]+$/).nil? then
+        @lhs = lhs.to_s
       else
-        @lhs = @lhs.to_i
+        @lhs = lhs.to_i
       end
 
-      if (@rhs =~ /^[0-9]+$/).nil? then
+      if rhs.class == Hash then
+        @rhs = Condition.new rhs
+      elsif (rhs.to_s =~ /^[0-9]+$/).nil? then
+        @rhs = rhs.to_s
       else
-        @rhs = @rhs.to_i
+        @rhs = rhs.to_i
       end
     end
 
@@ -125,6 +131,8 @@ module Mohair
       lhs = rhs = nil
       if @rhs.class == Fixnum then
         rhs = @rhs
+      elsif @rhs.class == Condition then
+        rhs = "( #{@rhs.to_js} )"
       elsif (@rhs[0] == "\"" and @rhs[-1] == "\"") then
         rhs = @rhs
       else
@@ -132,6 +140,8 @@ module Mohair
       end
       if @lhs.class == Fixnum then
         lhs = @lhs
+      elsif @lhs.class == Condition then
+        lhs = "( #{@lhs.to_js} )"
       elsif (@lhs[0] == "\"" and @lhs[-1] == "\"") then
         lhs = @lhs
       else
