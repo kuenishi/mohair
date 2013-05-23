@@ -6,18 +6,18 @@ require "mohair/selector"
 require "mohair/inserter"
 
 require "json"
-
+require "optparse"
 require "logger"
+
 LOG = Logger.new(STDERR)
 LOG.level = Logger::DEBUG # WARN, INFO, DEBUG, ...
 
 module Mohair
-  # Your code goes here...
   
   def self.usage
     print <<EOS
 usage:
- $ mohair "select foo, bar from bucket_name"
+ $ mohair -q "select foo, bar from bucket_name" [-i INDEX]
  $ mohair_dump <bucket_name> < sample_data.json
 
 insert, delete sentence is future work
@@ -27,18 +27,30 @@ EOS
   end
 
   def self.main
-    if ARGV.length < 1 then usage
-    elsif ARGV[0] == '-h' or ARGV[0] == '--help' then usage
-    end
 
-    @parser = Sql::Parser.new
-    sql_syntax_tree =  @parser.parse (ARGV[0].strip)
+    q = nil #query!!
+    index = nil
+
+    opt = OptionParser.new
+    opt.on('-q Q'){|v| q = v}
+    opt.on('-i INDEX'){|v| index = v}
+    opt.on('-h', '--help'){ usage }
+
+    opt.parse!(ARGV)
+
+    parser = Sql::Parser.new
+    sql_syntax_tree =  parser.parse (q.strip)
+    LOG.debug sql_syntax_tree
 
     case sql_syntax_tree[:op]
     when 'select'
-      LOG.debug sql_syntax_tree
 
       s = (Mohair.build sql_syntax_tree)
+
+      LOG.debug "mapper->\n"
+      LOG.debug s.mapper
+      LOG.debug "reducer->\n"
+      LOG.debug s.reducer
       
       client = Riak::Client.new(:protocol => "http")
       bucket = client.bucket(s.bucket)

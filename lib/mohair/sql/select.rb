@@ -7,8 +7,6 @@ module Mohair
       @from   = From.new tree[:from]
       @where  = Where.new tree[:where]
       @agg = false
-      print mapper
-      print reducer
     end
 
     def build_columns items
@@ -55,11 +53,8 @@ module Mohair
 
     def reducer
       @select.each do |c|
-        p c
         if c.is_agg? then
           agg_init, agg_fun = c.to_reduce_js
-          p agg_init
-          p agg_fun
           return ERB.new(ReducerTemplate).result(binding)
         end
       end
