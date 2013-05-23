@@ -72,9 +72,14 @@ module Mohair
       rule(:where_s)    {
         str('where') >> space? >> condition.as(:where)
       }
-      rule(:select)     {
-        select_s >> space? >> from_s >> space? >> where_s.maybe
+      rule(:group_s)    {
+        str('group') >> space? >> str('by') >> space? >> item.as(:group_by)
       }
+      rule(:select)     {
+        select_s >> space? >> from_s >> space? >>
+        (where_s >> space? >> group_s.maybe | group_s).maybe
+      }
+      ## limit 10 desc by 'col'
 
       rule(:expression) { select } #| insert | create }
       root :expression

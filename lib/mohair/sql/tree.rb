@@ -175,6 +175,10 @@ module Mohair
   end
 
   class Group
+    def initialize col
+      @col = col.to_s
+    end
+    
   end
 
 end

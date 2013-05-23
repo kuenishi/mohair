@@ -6,6 +6,7 @@ module Mohair
       @select = build_columns tree[:select]
       @from   = From.new tree[:from]
       @where  = Where.new tree[:where]
+      @group_by = Group.new tree[:group_by]
       @agg = false
     end
 

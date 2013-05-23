@@ -53,18 +53,16 @@ EOS
       LOG.debug s.reducer
       
       client = Riak::Client.new(:protocol => "http")
-      bucket = client.bucket(s.bucket)
+      bucket = Riak::MapReduce.new(client)
+        .add(client.bucket(s.bucket))## keyfilsters and so on here
+      
       reducer = s.reducer
       result = nil
       if reducer.nil? then
-        result = Riak::MapReduce.new(client)
-          .add(bucket)         ## keyfilsters and so on here
-          .map(s.mapper, :keep => true)
+        result = bucket.map(s.mapper, :keep => true)
           .run
       else
-        result = Riak::MapReduce.new(client)
-          .add(bucket)         ## keyfilsters and so on here
-          .map(s.mapper, :keep => false)
+        result = bucket.map(s.mapper, :keep => false)
           .reduce(reducer, :keep => true)
           .run
       end

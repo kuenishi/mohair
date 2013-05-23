@@ -22,7 +22,7 @@ class ParserTest < MiniTest::Unit::TestCase
       assert_equal(expected = "select", actual = s[:op])
       assert(! s[:select].nil?)
       assert(! s[:from].nil?)
-      Mohair.build s
+      assert(! (Mohair.build s).nil?)
     end
   end
 
@@ -51,7 +51,22 @@ class ParserTest < MiniTest::Unit::TestCase
       assert(! s[:select].nil?)
       assert(! s[:from].nil?)
       assert(! s[:where].nil?)
-      Mohair.build s
+      assert(! (Mohair.build s).nil?)
+    end
+  end
+
+  def test_group_by
+    [
+     'select a from b group by c',
+     'select a from b where a > 345 group by c',
+     'select a from b where a > 345 and foo = "hoge" group by c',
+    ].each do |where_sql|
+      s = @parser.parse where_sql
+      assert_equal(expected = "select", actual = s[:op])
+      assert(! s[:select].nil?)
+      assert(! s[:from].nil?)
+      assert(! s[:group_by].nil?)
+      assert(! (Mohair.build s).nil?)
     end
   end
 
