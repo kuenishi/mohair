@@ -67,7 +67,7 @@ EOS
           .run
       end
 
-      LOG.debug "raw query result> #{result}"
+      #LOG.debug "raw query result> #{result}"
       LOG.info "query result:"
       format_result result
 

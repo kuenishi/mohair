@@ -21,7 +21,7 @@ Or install it yourself as:
 now:
 
 ```
-$ bundle exec bin/mohair select all from sometable
+$ bundle exec bin/mohair -q "select all from sometable" -i INDEX
 $ bundle exec bin/mohair_dump < data.json
 ```
 
@@ -50,8 +50,8 @@ $ bundle exec bin/mohair -e "select * from sometable"
 
 ## TODO
 
-- built in functions
-- tests
-- complex conditions
+- group by
+- limit 10
+- asc/desc
 - 2i
 - query optimization

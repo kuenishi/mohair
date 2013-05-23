@@ -43,7 +43,7 @@ module Mohair
     def mapper
       where = @where.to_js
       if @select == :all then
-        ERB.new(GetAlolMapper).result(binding)
+        ERB.new(GetAllMapper).result(binding)
 
       else
         select = []
@@ -53,6 +53,9 @@ module Mohair
     end
 
     def reducer
+      if @select == :all then
+        return nil
+      end
       @select.each do |c|
         if c.is_agg? then
           agg_init, agg_fun = c.to_reduce_js
