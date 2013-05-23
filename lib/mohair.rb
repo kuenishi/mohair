@@ -1,4 +1,5 @@
 require "mohair/sql/parser"
+require "mohair/sql/tree"
 
 require "mohair/version"
 require "mohair/selector"
@@ -37,6 +38,7 @@ EOS
     when 'select'
       LOG.debug sql_syntax_tree
 
+      p (Mohair.build sql_syntax_tree)
       conn = Selector.new(sql_syntax_tree)
       result = conn.exec!
       LOG.debug "raw query result> #{result}"

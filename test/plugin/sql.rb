@@ -22,6 +22,7 @@ class ParserTest < MiniTest::Unit::TestCase
       assert_equal(expected = "select", actual = s[:op])
       assert(! s[:select].nil?)
       assert(! s[:from].nil?)
+      Mohair.build s
     end
   end
 
@@ -50,6 +51,7 @@ class ParserTest < MiniTest::Unit::TestCase
       assert(! s[:select].nil?)
       assert(! s[:from].nil?)
       assert(! s[:where].nil?)
+      Mohair.build s
     end
   end
 
