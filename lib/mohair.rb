@@ -38,13 +38,29 @@ EOS
     when 'select'
       LOG.debug sql_syntax_tree
 
-      p (Mohair.build sql_syntax_tree)
-      conn = Selector.new(sql_syntax_tree)
-      result = conn.exec!
+      s = (Mohair.build sql_syntax_tree)
+      
+      client = Riak::Client.new(:protocol => "http")
+      bucket = client.bucket(s.bucket)
+      reducer = s.reducer
+      result = nil
+      if reducer.nil? then
+        result = Riak::MapReduce.new(client)
+          .add(bucket)         ## keyfilsters and so on here
+          .map(s.mapper, :keep => true)
+          .run
+      else
+        result = Riak::MapReduce.new(client)
+          .add(bucket)         ## keyfilsters and so on here
+          .map(s.mapper, :keep => false)
+          .reduce(reducer, :keep => true)
+          .run
+      end
+
       LOG.debug "raw query result> #{result}"
       LOG.info "query result:"
-      conn.format_result
-      
+      format_result result
+
     # when :insert
     # when :show
     when :create
