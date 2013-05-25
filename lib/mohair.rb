@@ -17,7 +17,7 @@ module Mohair
   def self.usage
     print <<EOS
 usage:
- $ mohair -q "select foo, bar from bucket_name" [-i INDEX]
+ $ mohair -q "select foo, bar from bucket_name" [-i INDEX] [-s SERVER]
  $ mohair_dump <bucket_name> < sample_data.json
 
 insert, delete sentence is future work
@@ -30,13 +30,21 @@ EOS
 
     q = nil #query!!
     index = nil
+    host = 'localhost'
+    port = 8098
 
     opt = OptionParser.new
+    opt.on('-h', '--help'){ usage }
+    opt.on('-v', '--version'){ usage }
     opt.on('-q Q'){|v| q = v}
     opt.on('-i INDEX'){|v| index = v}
-    opt.on('-h', '--help'){ usage }
+    opt.on('-s SERVER'){|v|
+      host, port = v.split(':')
+    }
 
     opt.parse!(ARGV)
+    
+    LOG.info("connecting #{host}:#{port}")
 
     parser = Sql::Parser.new
     sql_syntax_tree =  parser.parse (q.strip)
@@ -52,7 +60,8 @@ EOS
       LOG.debug "reducer->\n"
       LOG.debug s.reducer
       
-      client = Riak::Client.new(:protocol => "http")
+      client = Riak::Client.new(:protocol => "http",
+                                :nodes => [{:host => host, :http_port => port}])
       bucket = Riak::MapReduce.new(client)
         .add(client.bucket(s.bucket))## keyfilsters and so on here
       

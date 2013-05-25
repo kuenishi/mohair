@@ -7,7 +7,9 @@ module Mohair
       @bucket_name = bucket_name
     end
     def insert_all objs
-      @client = Riak::Client.new(:protocol => "http")
+      @client = Riak::Client.new(:protocol => "http",
+                                :nodes => [
+                                           {:http_port => 10018}])
       bucket = @client.bucket(@bucket_name)
       if bucket.props["allow_mult"] then
         $stderr.puts "allow_mult should be false (how to handle siblilngs?)"

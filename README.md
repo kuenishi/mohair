@@ -60,5 +60,5 @@ $ bundle exec bin/mohair -q "select * from sometable"
 5. Create new Pull Request
 
 ```
-$ bundle exec rake release
+$ rake release
 ```
