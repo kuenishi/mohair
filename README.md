@@ -48,6 +48,12 @@ $ bundle exec bin/mohair -e "select * from sometable"
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+## Currently works
+
+- basic SQL parsing
+- select * from table
+- select col,col,col from table [where col = "name" and col < 23] [group by col]
+
 ## TODO
 
 - group by

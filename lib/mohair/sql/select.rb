@@ -42,13 +42,22 @@ module Mohair
 
     def mapper
       where = @where.to_js
+
+      ## don't do 'select * from table group by col'
       if @select == :all then
         ERB.new(GetAllMapper).result(binding)
+
+      elsif @group_by and @group_by.col then
+        select = []
+        col = @group_by.col
+        @select.each do |c| select << c.to_map_js end
+        ERB.new(GroupByMapperTemplate).result(binding)
 
       else
         select = []
         @select.each do |c| select << c.to_map_js end
         ERB.new(MapperTemplate).result(binding)
+
       end
     end
 
@@ -56,6 +65,11 @@ module Mohair
       if @select == :all then
         return nil
       end
+      if @group_by and @group_by.col then
+        col = @group_by.col
+        return ERB.new(GroupByReducerTemplate).result(binding)
+      end
+
       @select.each do |c|
         if c.is_agg? then
           agg_init, agg_fun = c.to_reduce_js

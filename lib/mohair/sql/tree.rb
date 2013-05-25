@@ -188,7 +188,10 @@ module Mohair
     def initialize col
       @col = col.to_s
     end
-    
+
+    def col
+      @col
+    end
   end
 
 end

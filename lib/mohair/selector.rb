@@ -60,6 +60,70 @@ function(v){
   }
 }
 GETALLMAPPER
+
+  GroupByMapperTemplate = <<EOGROUPER
+function(v){
+  ejsLog('/tmp/map_reduce.log', "startmapper>")
+  var f = function(key, obj){
+    var ret = {};
+    <% select.each do |c| %>
+    <%=  c %>
+    <% end %>
+    ret.__key = key;
+    <%= where %>
+  };
+  var arr = [];
+  var raw_obj = JSON.parse(v.values[0].data);
+  if(raw_obj instanceof Array){
+    var ret0 = [];
+    for(var i in raw_obj){
+      ret0 = ret0.concat(f(v.key, raw_obj[i]));
+    }
+    arr = ret0;
+  }else{
+    arr = f(v.key, raw_obj);
+  }
+  var ret = {};
+  for(var i in arr){
+    //ejsLog('/tmp/map_reduce.log', JSON.stringify(arr[i].<%= col %>))
+    var col = arr[i].<%= col %>;
+    //ejsLog('/tmp/map_reduce.log', JSON.stringify(col))
+    if(ret[col]){
+      ret[col] = ret[col].push(arr[i]);
+      //ejsLog('/tmp/map_reduce.log', JSON.stringify(ret[col]))
+    }else{
+      ret[col] = [arr[i]];
+      //ejsLog('/tmp/map_reduce.log', JSON.stringify(ret[col]))
+    }
+  }
+  ejsLog('/tmp/map_reduce.log', "<eomapper")
+  return [ret];
+}
+EOGROUPER
+
+
+## merge them all
+## [{ k, v }, ....] -> {k, v}
+  GroupByReducerTemplate = <<EOREDUCEGROUPER
+function(values){
+  ejsLog('/tmp/map_reduce.log', "start>");
+  var ret = {};
+  for(var i in values){
+  ejsLog('/tmp/map_reduce.log', JSON.stringify(i))
+    for(var a in values[i]){
+      if(ret[a]){
+        ret[a] = ret[a].concat(values[i][a]);
+      }else{
+        ret[a] = values[i][a];
+      }
+    }
+  }
+  ejsLog('/tmp/map_reduce.log', "<end");
+//  ejsLog('/tmp/map_reduce.log', JSON.stringify(ret))
+  return [ret];
+}
+EOREDUCEGROUPER
+
   
   def Mohair.format_result results
     columns = Set.new
