@@ -1,7 +1,5 @@
 # Mohair
 
-TODO: Write a gem description
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -61,3 +59,6 @@ $ bundle exec bin/mohair -q "select * from sometable"
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+```
+$ bundle exec rake release
+```
