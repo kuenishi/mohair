@@ -48,6 +48,7 @@ function(v){
     ret.__key = key;
     <%= where %>
   };
+  //ejsLog('/tmp/map_reduce.log', JSON.stringify(v))
   var raw_obj = JSON.parse(v.values[0].data);
   if(raw_obj instanceof Array){
     var ret0 = [];

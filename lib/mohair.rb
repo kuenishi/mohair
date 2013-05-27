@@ -10,7 +10,7 @@ require "optparse"
 require "logger"
 
 LOG = Logger.new(STDERR)
-LOG.level = Logger::DEBUG # WARN, INFO, DEBUG, ...
+LOG.level = Logger::INFO # WARN, INFO, DEBUG, ...
 
 module Mohair
   
@@ -35,6 +35,9 @@ EOS
 
     opt = OptionParser.new
     opt.on('-h', '--help'){ usage }
+    opt.on('-d', '--debug'){
+      LOG.level = Logger::DEBUG
+    }
     opt.on('-v', '--version'){ usage }
     opt.on('-q Q'){|v| q = v}
     opt.on('-i INDEX'){|v| index = v}

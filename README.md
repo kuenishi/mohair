@@ -45,11 +45,10 @@ $ bundle exec bin/mohair -q "select * from sometable"
 
 ## TODO
 
-- group by
-- timestamp type
-- recursive representation of json with dot notation
 - limit 10
 - asc/desc
+- timestamp type
+- recursive representation of json with dot notation
 - 2i
 - query optimization
 
