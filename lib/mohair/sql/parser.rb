@@ -31,7 +31,7 @@ module Mohair
         (
          str('\\') >> any |
          str('"').absent? >> any
-         ).repeat.as(:string) >> 
+         ).repeat >> 
         str('"')
       }
 

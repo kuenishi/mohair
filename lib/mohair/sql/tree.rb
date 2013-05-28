@@ -110,43 +110,35 @@ module Mohair
       rhs = tree[:rhs]
       @op  = tree[:op].to_s
 
-      if lhs.class == Hash then
-        @lhs = Condition.new lhs
-      elsif (lhs.to_s =~ /^[0-9]+$/).nil? then
-        @lhs = lhs.to_s
-      else
-        @lhs = lhs.to_i
-      end
+      @lhs = objectize lhs
+      @rhs = objectize rhs
+    end
 
-      if rhs.class == Hash then
-        @rhs = Condition.new rhs
-      elsif (rhs.to_s =~ /^[0-9]+$/).nil? then
-        @rhs = rhs.to_s
+    def objectize s
+      if s.class == Hash then
+        Condition.new s
+      elsif (s.to_s =~ /^[0-9]+$/).nil? then
+        s.to_s
       else
-        @rhs = rhs.to_i
+        s.to_i
+      end
+    end
+
+    def jstify o
+      if o.class == Fixnum then
+        o
+      elsif o.class == Condition then
+        "( #{o.to_js} )"
+      elsif (o[0] == "\"" and o[-1] == "\"") then
+        o
+      else
+        "obj.#{o}"
       end
     end
 
     def to_js
-      lhs = rhs = nil
-      if @rhs.class == Fixnum then
-        rhs = @rhs
-      elsif @rhs.class == Condition then
-        rhs = "( #{@rhs.to_js} )"
-      elsif (@rhs[0] == "\"" and @rhs[-1] == "\"") then
-        rhs = @rhs
-      else
-        rhs = "obj.#{@rhs}"
-      end
-      if @lhs.class == Fixnum then
-        lhs = @lhs
-      elsif @lhs.class == Condition then
-        lhs = "( #{@lhs.to_js} )"
-      elsif (@lhs[0] == "\"" and @lhs[-1] == "\"") then
-        lhs = @lhs
-      else
-        lhs = "obj.#{@lhs}"
-      end
+      lhs = jstify @lhs
+      rhs = jstify @rhs
       " (#{lhs}) #{operator2str(@op)} (#{rhs}) "
     end
 
