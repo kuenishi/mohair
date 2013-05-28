@@ -30,6 +30,7 @@ class ParserTest < MiniTest::Unit::TestCase
     [
      'select',
      ' select a from b',
+     'select a, b from c where a = "120.0, ~!@#$%^&*+_\}{\" asdfa"sf"',
      ].each do |bad_sql|
       assert_raises Parslet::ParseFailed do
         @parser.parse bad_sql
@@ -45,6 +46,10 @@ class ParserTest < MiniTest::Unit::TestCase
      'select a,b from c where 20 < a or b = 234',
      'select a, b from c where a = "oo"',
      'select a, b from c where a = "oo" and c > 235',
+     'select a, b from c where a = "120.0, ~!@#$%^&*+_\}{\" asdfasf"',
+     #'select a from b where a > 20.0',
+     #'select a from b where a > 0.0',
+     #'select a from b where a > -0',
     ].each do |where_sql|
       s = @parser.parse where_sql
       assert_equal(expected = "select", actual = s[:op])

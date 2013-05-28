@@ -47,7 +47,7 @@ $ bundle exec bin/mohair -q "select * from sometable"
 
 - limit 10
 - asc/desc
-- timestamp type
+- types: timestamp, float, escaped string
 - recursive representation of json with dot notation
 - 2i
 - query optimization
