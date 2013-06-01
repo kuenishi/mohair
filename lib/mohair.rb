@@ -1,31 +1,19 @@
-require "mohair/sql/parser"
-require "mohair/sql/tree"
+require_relative './mohair/sql/parser'
+require_relative './mohair/sql/tree'
 
-require "mohair/version"
-require "mohair/selector"
-require "mohair/inserter"
+require_relative './mohair/version'
+require_relative './mohair/selector'
+require_relative './mohair/inserter'
 
-require "json"
-require "optparse"
-require "logger"
+require 'json'
+require 'optparse'
+require 'logger'
 
 LOG = Logger.new(STDERR)
 LOG.level = Logger::INFO # WARN, INFO, DEBUG, ...
 
 module Mohair
   
-  def self.usage
-    print <<EOS
-usage:
- $ mohair -q "select foo, bar from bucket_name" [-i INDEX] [-s SERVER]
- $ mohair_dump <bucket_name> < sample_data.json
-
-insert, delete sentence is future work
-mohair version #{Mohair::VERSION}
-EOS
-    exit -1
-  end
-
   def self.main
 
     q = nil #query!!
@@ -34,11 +22,19 @@ EOS
     port = 8098
 
     opt = OptionParser.new
-    opt.on('-h', '--help'){ usage }
+    opt.banner = <<-EOS
+usage:
+ $ mohair -q "select foo, bar from bucket_name" [-i INDEX] [-s SERVER]
+ $ mohair_dump <bucket_name> < sample_data.json
+
+insert, delete sentence is future work
+mohair version #{Mohair::VERSION}
+    EOS
+    opt.on('-h', '--help'){ puts opt; abort }
     opt.on('-d', '--debug'){
       LOG.level = Logger::DEBUG
     }
-    opt.on('-v', '--version'){ usage }
+    opt.on('-v', '--version'){ puts opt; abort }
     opt.on('-q Q'){|v| q = v}
     opt.on('-i INDEX'){|v| index = v}
     opt.on('-s SERVER'){|v|
@@ -50,7 +46,7 @@ EOS
     LOG.info("connecting #{host}:#{port}")
 
     parser = Sql::Parser.new
-    sql_syntax_tree =  parser.parse (q.strip)
+    sql_syntax_tree = parser.parse(q.strip)
     LOG.debug sql_syntax_tree
 
     case sql_syntax_tree[:op]
