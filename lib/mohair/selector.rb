@@ -90,7 +90,7 @@ function(v){
     var col = arr[i].<%= col %>;
     //ejsLog('/tmp/map_reduce.log', JSON.stringify(col))
     if(ret[col]){
-      ret[col] = ret[col].push(arr[i]);
+      ret[col].push(arr[i]);
       //ejsLog('/tmp/map_reduce.log', JSON.stringify(ret[col]))
     }else{
       ret[col] = [arr[i]];
